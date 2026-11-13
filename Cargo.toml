@@ -56,7 +56,7 @@ obusina-canvas = { path = "crates/obusina-canvas", version = "1.0.5" }
 obusina-panel = { path = "crates/obusina-panel", version = "1.0.5" }
 obusina-pattern = { path = "crates/obusina-pattern", version = "1.0.5" }
 # The menu, a project of its own (`RULE plate_menu.shared`), at one commit.
-egui-plate-menu = { git = "https://github.com/noktoborus/egui-plate-menu", rev = "ed36b7bb55c509af219a87957c1078d969db4f7b" }
+egui-plate-menu = { git = "https://github.com/noktoborus/egui-plate-menu", rev = "ceb65a2bd2b4795edba0b8621ec001d9b3c609dd" }
 unifs = { path = "crates/unifs", version = "1.0.5" }
 
 [profile.release]
