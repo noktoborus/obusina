@@ -3203,12 +3203,10 @@ checksum = "b4596b6d070b27117e987119b4dac604f3c58cfb0b191112e24771b2faeac1a6"
 
 [[package]]
 name = "plate-menu"
-version = "1.0.5"
+version = "2.0.0"
 dependencies = [
  "base64",
- "eframe",
  "egui",
- "egui_kittest",
  "nucleo-matcher",
  "thiserror 2.0.21",
 ]

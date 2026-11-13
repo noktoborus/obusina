@@ -47,7 +47,9 @@ impl Layer {
             Layer::Menu => {
                 "Any other menu: the settings, a colour, the picture, a card of the \
                  list. The keys are those of `plate-menu`. A menu opens with no entry \
-                 selected: Down selects the first, Up the last, Enter does nothing."
+                 selected: Down and the wheel select the first, Up the last, Enter \
+                 does nothing. The pointer moved onto an entry selects it. The right \
+                 button steps out of a level; at the top it closes the menu."
             }
             Layer::Text => "A text field holds the keys. It takes all but the global ones.",
             Layer::Help => {

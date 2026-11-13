@@ -114,7 +114,7 @@ RULE crate.layers : every crate of the workspace stands in one layer; a crate
      0 platform       unifs
      1 model          obusina-pattern, obusina-backdrop
      2 drawing        obusina-canvas, obusina-panel, obusina-button,
-                      plate-menu, egui-notify
+                      egui-notify
      3 application    obusina
      4 entry          obusina-android
 WHY  a dependency that goes down keeps each layer whole without the ones
@@ -135,14 +135,12 @@ EX+  a widget crate that knows egui and nothing of this application
 EX-  obusina_pattern::Pattern reading `settings.yaml`
 EX-  obusina_pattern depending on egui for `Color32`
 
-RULE plate_menu.copy : `crates/plate-menu` is a copy of the crate of zyterm,
-     moved to egui 0.37
-WHY  zyterm is on egui 0.36, and a path to its crate brings a second egui
-     whose types do not meet those of this one
-THEN the copy goes once both share one crate on one egui
-EXC  the copy, by the user's word, until then
-EXC  work on obusina touches no other project, by the user's word: a change
-     of this copy is not carried to zyterm, and the two drift apart
+RULE plate_menu.shared : `plate-menu` is /workspace/platemenu, a project of
+     its own that zyterm uses too, taken by the path `../platemenu`
+WHY  one menu on one egui; two copies drifted apart
+THEN a change of the menu is made there, under its AGENTS.md, and keeps
+     zyterm working; a behaviour one of the two does not want is an option
+EXC  a path out of this repository, by the user's word
 
 RULE notify.patch : `crates/egui-notify` is a copy of egui-notify 0.24.0 of
      crates.io with a button of an action; `[patch.crates-io]` of the

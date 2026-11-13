@@ -19,7 +19,7 @@ A crate depends only on crates of the layers below its own
                    │
 3 application  obusina (binary and library)
                    │
-2 drawing      obusina-canvas  obusina-panel  obusina-button  plate-menu  egui-notify
+2 drawing      obusina-canvas  obusina-panel  obusina-button  egui-notify
                    │
 1 model        obusina-pattern  obusina-backdrop
                                     │
@@ -33,7 +33,8 @@ A crate depends only on crates of the layers below its own
 | `obusina-canvas -> obusina-pattern` | 2 → 1 |
 | `obusina-backdrop -> unifs` | 1 → 0 |
 
-`plate-menu` is a copy of the crate of zyterm. `egui-notify` is a copy of
+`plate-menu` is /workspace/platemenu, a project beside obusina that zyterm
+uses too; it stands in layer 2. `egui-notify` is a copy of
 egui-notify 0.24.0, put in place by `[patch.crates-io]`. `experiments/glyphs`
 and `experiments/mockups` are no layer: nothing depends on them.
 
