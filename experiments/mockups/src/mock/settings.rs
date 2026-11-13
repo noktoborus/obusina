@@ -17,7 +17,7 @@ use std::sync::{Arc, Mutex};
 
 use egui::{Color32, Rect, Sense, Vec2, vec2};
 use obusina_button::SquareButton;
-use plate_menu::{Detail, MenuItem, Notice, PlateMenu};
+use egui_plate_menu::{Detail, MenuItem, Notice, PlateMenu};
 
 use super::{BUTTON, Lang, Mockup, named};
 

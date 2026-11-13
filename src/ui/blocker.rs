@@ -3,7 +3,7 @@
 //! beside the menu closes it and reaches nothing under the layer.
 
 use egui::{Color32, Frame, Id, Modal};
-use plate_menu::PlateMenu;
+use egui_plate_menu::PlateMenu;
 
 /// Lays a layer that takes every press under the menu of `menu`, and puts
 /// the menu on top, for this frame. Called in every frame the menu is open.

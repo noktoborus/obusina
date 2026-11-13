@@ -231,7 +231,7 @@ on the field, columns 1 2 3       the file
 26. **Each entry of the menu of the settings shows what it is now** right
     of its label: the kind of grid, the turn, the step of the ruling, the
     size of the field, a swatch of the paper, on or off
-    (`plate_menu::Detail`).
+    (`egui_plate_menu::Detail`).
 27. **What changes the pattern is a level of the menu of the settings**
     (`src/ui/settings_menu.rs`):
 

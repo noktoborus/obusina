@@ -1,4 +1,4 @@
-# A key is a row of a table of `src/keys.rs` or of `plate-menu` (`RULE ui.keys`).
+# A key is a row of a table of `src/keys.rs` or of `egui-plate-menu` (`RULE ui.keys`).
 disallowed-methods = [
     { path = "egui::InputState::key_pressed", reason = "a key is a row of a table, read by `keys::take` (RULE ui.keys)" },
     { path = "egui::InputState::key_down", reason = "a key is a row of a table, read by `keys::take` (RULE ui.keys)" },

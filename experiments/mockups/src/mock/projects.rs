@@ -54,7 +54,7 @@ use std::collections::BTreeSet;
 use std::sync::{Arc, Mutex};
 
 use egui::{Color32, Rect, Sense, Vec2, pos2, vec2};
-use plate_menu::{MenuItem, Notice, PlateMenu};
+use egui_plate_menu::{MenuItem, Notice, PlateMenu};
 
 use super::{Lang, Mockup, named};
 

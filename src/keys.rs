@@ -10,7 +10,7 @@
 //!
 //! Nothing else reads a key: `clippy.toml` refuses `key_pressed`,
 //! `consume_key` and `consume_shortcut` everywhere but here and in
-//! `plate-menu` (`RULE ui.keys`).
+//! `egui-plate-menu` (`RULE ui.keys`).
 
 use egui::{Context, Key, KeyboardShortcut, ModifierNames, Modifiers};
 
@@ -216,9 +216,9 @@ pub fn rows<A>(table: &[Binding<A>]) -> Vec<Row> {
         .collect()
 }
 
-/// The rows of `plate-menu`: the keys every menu is walked by.
+/// The rows of `egui-plate-menu`: the keys every menu is walked by.
 fn menu_rows() -> Vec<Row> {
-    plate_menu::KEYS
+    egui_plate_menu::KEYS
         .iter()
         .map(|(key, walk)| Row {
             keys: vec![plain(*key)],
@@ -228,8 +228,8 @@ fn menu_rows() -> Vec<Row> {
 }
 
 /// The key of the text of what a key of a menu does.
-fn walk_name(walk: plate_menu::Walk) -> &'static str {
-    use plate_menu::Walk;
+fn walk_name(walk: egui_plate_menu::Walk) -> &'static str {
+    use egui_plate_menu::Walk;
     match walk {
         Walk::Close => "keys.menu.close",
         Walk::Down => "keys.menu.down",

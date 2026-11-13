@@ -18,7 +18,7 @@
 
 use std::sync::Arc;
 
-use plate_menu::{MenuItem, Notice};
+use egui_plate_menu::{MenuItem, Notice};
 use rust_i18n::t;
 
 use crate::app::App;

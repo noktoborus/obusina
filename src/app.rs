@@ -133,7 +133,7 @@ pub struct App {
     /// A line for the user: what was saved, what failed.
     pub(crate) message: Option<String>,
     /// The menu of the settings: the grid, the ruling, the paper, the glow.
-    pub(crate) menu: plate_menu::PlateMenu,
+    pub(crate) menu: egui_plate_menu::PlateMenu,
     /// The settings: the place of each panel.
     pub(crate) settings: Settings,
     /// The palette the panel and the window show.
@@ -149,7 +149,7 @@ pub struct App {
     /// The picture under the pattern.
     pub(crate) backdrop: crate::backdrop::Backdrop,
     /// The menu of the picture.
-    pub(crate) backdrop_menu: plate_menu::PlateMenu,
+    pub(crate) backdrop_menu: egui_plate_menu::PlateMenu,
     /// A choice of a picture file under way.
     pub(crate) picker: crate::pick::Picker,
     /// The toasts: what was done, and the undo of a move to the trash.
@@ -207,14 +207,14 @@ impl App {
             pattern,
             history: History::default(),
             message: None,
-            menu: plate_menu::PlateMenu::new().with_id("settings-menu"),
+            menu: egui_plate_menu::PlateMenu::new().with_id("settings-menu"),
             settings,
             palette: 0,
             palette_window: Default::default(),
             posture: crate::settings::Posture::Landscape,
             settings_edit: None,
             backdrop: crate::backdrop::Backdrop::new(places.pictures),
-            backdrop_menu: plate_menu::PlateMenu::new().with_id("backdrop-menu"),
+            backdrop_menu: egui_plate_menu::PlateMenu::new().with_id("backdrop-menu"),
             picker: crate::pick::Picker::default(),
             toasts: egui_notify::Toasts::new().with_anchor(egui_notify::Anchor::BottomRight),
             help: None,

@@ -33,8 +33,8 @@ A crate depends only on crates of the layers below its own
 | `obusina-canvas -> obusina-pattern` | 2 → 1 |
 | `obusina-backdrop -> unifs` | 1 → 0 |
 
-`plate-menu` is /workspace/platemenu, a project beside obusina that zyterm
-uses too; it stands in layer 2. `egui-notify` is a copy of
+`egui-plate-menu` is a project of its own, https://github.com/noktoborus/egui-plate-menu,
+that zyterm uses too, taken at one commit; it stands in layer 2. `egui-notify` is a copy of
 egui-notify 0.24.0, put in place by `[patch.crates-io]`. `experiments/glyphs`
 and `experiments/mockups` are no layer: nothing depends on them.
 
@@ -45,7 +45,7 @@ and `experiments/mockups` are no layer: nothing depends on them.
 | `obusina-canvas` | the field of beads: draws a pattern, moves and zooms, says which bead is pressed |
 | `obusina-backdrop` | the pictures under the patterns and how each lies, kept in a directory of the cache |
 | `obusina-button` | a button of a fixed size, its label in the middle, plain, selected or filled |
-| `plate-menu` | a menu of wide plates in the middle of the window; the settings are chosen in it |
+| `egui-plate-menu` | a menu of wide plates in the middle of the window; the settings are chosen in it |
 | `obusina-panel` | a floating panel with no grip, moved by any place of it, stood against the edge it is let go at |
 | `egui-notify` | toasts, with a button of an action; a copy of the crate of crates.io |
 | `obusina` | the window, the list of patterns, the panels, the history of edits, the settings, the text of the user |

@@ -7,9 +7,9 @@
 
 use std::sync::{Arc, Mutex};
 
+use egui_plate_menu::Notice;
 use obusina_canvas::View;
 use obusina_pattern::{Bounds, Pattern};
-use plate_menu::Notice;
 use rust_i18n::t;
 
 use crate::ui::access::Named;

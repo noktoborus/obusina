@@ -40,8 +40,8 @@
 use std::sync::{Arc, Mutex};
 
 use egui::Color32;
+use egui_plate_menu::{Detail, MenuItem, Notice};
 use obusina_pattern::{Bounds, DEFAULT_PAPER, Grid, Rgb, Ruling};
-use plate_menu::{Detail, MenuItem, Notice};
 use rust_i18n::t;
 
 use crate::app::App;

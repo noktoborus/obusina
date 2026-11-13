@@ -46,7 +46,7 @@ impl Layer {
             }
             Layer::Menu => {
                 "Any other menu: the settings, a colour, the picture, a card of the \
-                 list. The keys are those of `plate-menu`. A menu opens with no entry \
+                 list. The keys are those of `egui-plate-menu`. A menu opens with no entry \
                  selected: Down selects the first, Up the last, and the wheel the same \
                  way; Enter does nothing. The pointer moved onto an entry selects it. The right \
                  button steps out of a level; at the top it closes the menu."

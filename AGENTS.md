@@ -135,12 +135,16 @@ EX+  a widget crate that knows egui and nothing of this application
 EX-  obusina_pattern::Pattern reading `settings.yaml`
 EX-  obusina_pattern depending on egui for `Color32`
 
-RULE plate_menu.shared : `plate-menu` is /workspace/platemenu, a project of
-     its own that zyterm uses too, taken by the path `../platemenu`
-WHY  one menu on one egui; two copies drifted apart
-THEN a change of the menu is made there, under its AGENTS.md, and keeps
-     zyterm working; a behaviour one of the two does not want is an option
-EXC  a path out of this repository, by the user's word
+RULE plate_menu.shared : `egui-plate-menu` is https://github.com/noktoborus/egui-plate-menu, a
+     project of its own that zyterm uses too, taken from git at one commit
+     (`rev`), never at a branch
+WHY  one menu on one egui; two copies drifted apart. A commit builds the same
+     today and in a year; a branch moves under the build
+THEN a change of the menu is made there (/workspace/egui-plate-menu), under its
+     AGENTS.md, and keeps zyterm working; a behaviour one of the two does not
+     want is an option. It reaches obusina when the commit is pushed and `rev`
+     names it, here and in experiments/mockups
+EX-  egui-plate-menu = { git = "…", branch = "main" }
 
 RULE notify.patch : `crates/egui-notify` is a copy of egui-notify 0.24.0 of
      crates.io with a button of an action; `[patch.crates-io]` of the
@@ -443,7 +447,7 @@ EX+  button::icon(ui, icons::UNDO, &t!("edit.undo"), can_undo)
 EX-  ui.add(egui::Button::new(icons::UNDO)) in a panel
 REF  src/ui/button.rs
 
-RULE ui.menu : a choice among variants is a `plate_menu::PlateMenu` in the
+RULE ui.menu : a choice among variants is a `egui_plate_menu::PlateMenu` in the
      middle of the window, opened by a button of a panel
 EX+  the kinds of grid, a level of `src/ui/settings_menu.rs`
 EX-  an `egui::Popup` or a `ComboBox` under the button
@@ -461,7 +465,7 @@ RULE ui.keys : every key is a row of a table: `Binding`s of the layer,
 THEN a layer reads its table with `keys::take`; a new layer is a variant
      of `keys::Layer`, its table named in `keys::keymap`
 THEN `clippy.toml` refuses `key_pressed`, `consume_key` and their kin; only
-     `keys::take` and the menu of `plate-menu` read a key
+     `keys::take` and the menu of `egui-plate-menu` read a key
 THEN `UPDATE_KEYS=1 cargo test -p obusina keys` writes `docs/keys.md` from
      the tables; a test fails while the file says other
 EX+  Binding { keys: &[command(Key::Z)], action: FieldAction::Undo, name: "edit.undo" }

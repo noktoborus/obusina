@@ -21,8 +21,8 @@
 use std::sync::{Arc, Mutex};
 
 use egui::{Color32, Id, Key, Modal, Order, Pos2, Rect, Sense, vec2};
+use egui_plate_menu::{MenuItem, Notice, PlateMenu};
 use obusina_pattern::{Colour, Palette, Pattern, Rgb};
-use plate_menu::{MenuItem, Notice, PlateMenu};
 use rust_i18n::t;
 
 use crate::app::App;

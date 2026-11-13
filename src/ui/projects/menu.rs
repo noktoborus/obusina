@@ -14,8 +14,8 @@
 
 use std::sync::{Arc, Mutex};
 
+use egui_plate_menu::{MenuItem, Notice};
 use obusina_pattern::PatternId;
-use plate_menu::{MenuItem, Notice};
 use rust_i18n::t;
 
 use super::View;

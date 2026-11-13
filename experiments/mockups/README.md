@@ -6,7 +6,7 @@ Mockups of the design of the window, shown in the gallery of `showcase`.
 
 - A mockup is a part of the window drawn with made up data: a panel, a
   window, a row of buttons. It is drawn with the widget crates of the
-  workspace (`obusina-button`, `plate-menu`), so it looks as the window will.
+  window (`obusina-button`, `egui-plate-menu`), so it looks as the window will.
 - One module of `src/mock/` is one mockup, a `showcase::Mockup`. `mock::all`
   lists them for the gallery; `src/main.rs` hands them to `showcase::run`.
 - The gallery, the notes on a mockup, the page of the pictures and the

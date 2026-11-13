@@ -41,8 +41,8 @@ use std::time::Duration;
 
 use egui::{Key, Vec2, vec2};
 use egui_notify::ToastId;
+use egui_plate_menu::PlateMenu;
 use obusina_pattern::{Pattern, PatternId};
-use plate_menu::PlateMenu;
 use rust_i18n::t;
 
 use crate::app::{App, say};
