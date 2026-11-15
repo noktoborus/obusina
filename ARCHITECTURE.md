@@ -34,7 +34,7 @@ A crate depends only on crates of the layers below its own
 | `obusina-backdrop -> unifs` | 1 → 0 |
 
 `egui-plate-menu` is a project of its own, https://github.com/noktoborus/egui-plate-menu,
-that zyterm uses too, taken at one commit; it stands in layer 2. `egui-notify` is a copy of
+that other applications use too, taken at one commit; it stands in layer 2. `egui-notify` is a copy of
 egui-notify 0.24.0, put in place by `[patch.crates-io]`. `experiments/glyphs`
 and `experiments/mockups` are no layer: nothing depends on them.
 
@@ -95,7 +95,7 @@ of `cache` beside the internal data path (`docs/backdrop.md`).
 
 ## Rendering
 
-`src/render.rs` starts the window on `wgpu` the way zyterm does: a graphics
+`src/render.rs` starts the window on `wgpu`: a graphics
 chip before a software adapter, and the limits of the device cut to what the
 adapter grants, so a small chip still gets its window.
 

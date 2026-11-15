@@ -136,13 +136,13 @@ EX-  obusina_pattern::Pattern reading `settings.yaml`
 EX-  obusina_pattern depending on egui for `Color32`
 
 RULE plate_menu.shared : `egui-plate-menu` is https://github.com/noktoborus/egui-plate-menu, a
-     project of its own that zyterm uses too, taken from git at one commit
-     (`rev`), never at a branch
+     project of its own that other applications use too, taken from git at
+     one commit (`rev`), never at a branch
 WHY  one menu on one egui; two copies drifted apart. A commit builds the same
      today and in a year; a branch moves under the build
-THEN a change of the menu is made there (/workspace/egui-plate-menu), under its
-     AGENTS.md, and keeps zyterm working; a behaviour one of the two does not
-     want is an option. It reaches obusina when the commit is pushed and `rev`
+THEN a change of the menu is made in its own repository, under its
+     AGENTS.md, and keeps the other applications working; a behaviour one of
+     them does not want is an option. It reaches obusina when the commit is pushed and `rev`
      names it, here and in experiments/mockups
 EX-  egui-plate-menu = { git = "…", branch = "main" }
 
@@ -377,23 +377,13 @@ REF  experiments/glyphs/README.md
 
 RULE ui.mockup : a design discussed before it is built is shown as a mockup
      of `experiments/mockups`, built by `make mockups` into the module
-     `mockups` of the desk `obusina` of showcase
+     `mockups` of the desk `obusina`
 THEN one module of `src/mock/` per mockup, drawn with the widget crates and
-     made up data; the address `#obusina/mockups/<name>` opens it
-THEN the gallery, the notes and the server are `/workspace/showcase`, a
-     project of its own; `experiments/mockups` holds only the mockups of
-     obusina and depends on it by path
-REF  /workspace/showcase/README.md
+     made up data
 THEN a mockup is no test and no part of the window: the window is built and
      tested on its own (`RULE test.window`)
-RULE ui.mockup.notes : a note left on a mockup is read with
-     `../showcase/target/debug/showcase notes --desk obusina`, acted on, then
-     deleted with its picture
-THEN what it decided goes to the plan or to the documentation; a note is not
-     kept
-THEN while the user works on mockups, `../showcase/target/debug/showcase wait
-     --desk obusina` runs in the background; when it ends, the notes are read
-     and it is started again
+THEN what a note on a mockup decided goes to the plan or to the
+     documentation; a note is not kept
 REF  experiments/mockups/README.md
 
 RULE log.lang = english, through the `log` crate
@@ -478,8 +468,8 @@ THEN a floating panel is kept inside the window when the window is smaller
 RULE ui.render = `render::native_options` starts the window, on every platform
      but a browser; `render::web_options` starts the page in a browser
 WHY  a modest chip ends up drawn by the processor unless the adapter is
-     picked by hand and the limits asked are cut to what it grants; the same
-     code runs the window of zyterm. A browser picks the adapter itself, but
+     picked by hand and the limits asked are cut to what it grants. A browser
+     picks the adapter itself, but
      the defaults of eframe ask a texture of 8192, and a Raspberry Pi grants
      4096
 THEN the glyph atlas is cut to `render::ATLAS_SIDE` in `App::raw_input_hook`
@@ -615,11 +605,11 @@ THEN cargo fmt --all
      cargo clippy --workspace --all-targets
      cargo build --workspace
      cargo test --workspace
-     . /opt/env.sh && make build-windows
+     make build-windows
      cargo audit
 WHY  code gated by `cfg` for windows is compiled only for windows; the tests
      run on the linux build
-WHY  `/opt/env.sh` puts mingw on the path; `windres` of it compiles the icon
+THEN `make build-windows` needs mingw on PATH; its `windres` compiles the icon
 
 RULE checks.web : the page of the browser is built when a change touches
      `web/`, `Trunk.toml`, the code gated for wasm or what it calls
@@ -628,7 +618,7 @@ THEN make web
 RULE checks.android : the android package is built when a change touches
      `android/`, the code gated for android or what it calls, or when the
      user asks
-THEN make apk, after `. /opt/env.sh`
+THEN make apk
 
 ## Commits
 
@@ -670,7 +660,7 @@ THEN Wayland, as the user `headless`: cage refuses to run as root. Its runtime
      processor:
        runuser -u headless -- env -u DISPLAY XDG_RUNTIME_DIR=<run> HOME=<home> \
          WLR_BACKENDS=headless WLR_LIBINPUT_NO_DEVICES=1 WLR_RENDERER=pixman \
-         cage -- /workspace/obusina/target/debug/obusina &
+         cage -- "$PWD/target/debug/obusina" &
        runuser -u headless -- env XDG_RUNTIME_DIR=<run> WAYLAND_DISPLAY=wayland-0 grim shot.png
 THEN stop what was started by its name: `pkill -x obusina`, `pkill -x cage`,
      `pkill -x Xvfb`

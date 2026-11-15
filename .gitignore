@@ -1,5 +1,7 @@
 /target
 /experiments/mockups/target
+# the link to showcase that `make mockups` makes from SHOWCASE
+/experiments/mockups/.showcase
 
 # The list `experiments/glyphs` writes when it is run from here
 /glyphs.txt

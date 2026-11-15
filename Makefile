@@ -40,11 +40,12 @@ build-android:
 # The key lives outside the repositories (android/README.md).
 # `apk-release` is signed when OBUSINA_KEYSTORE names a keystore, else
 # unsigned: target/obusina-release.apk.
-DEBUG_KEY ?= $(abspath ../android-key/debug.keystore)
-# The build tools of /opt/packages.sh, which the Android Gradle plugin uses.
+DEBUG_KEY ?= $(OBUSINA_DEBUG_KEY)
+# The build tools the Android Gradle plugin uses, in ANDROID_HOME.
 BUILD_TOOLS = $(ANDROID_HOME)/build-tools/36.0.0
 
 apk: $(DEBUG_KEY)
+	@test -n "$(DEBUG_KEY)" || { echo 'OBUSINA_DEBUG_KEY: the file of the debug key'; exit 1; }
 	cd android && env -u OBUSINA_KEYSTORE ./gradlew --no-daemon assembleRelease
 	mkdir -p target
 	$(BUILD_TOOLS)/zipalign -c -p 4 android/app/build/outputs/apk/release/app-release-unsigned.apk
@@ -77,14 +78,15 @@ install:
 	sudo update-desktop-database $(APPDIR) 2>/dev/null || true
 
 # The mockups of experiments/mockups, built into the module `mockups` of the
-# desk `obusina` of the server of /workspace/showcase on port 6080. The server
-# is started if none answers, and lives on after the command. trunk and
-# wasm-bindgen are the ones /opt/packages.sh installs: run after
-# `. /opt/env.sh`.
+# desk `obusina` of the server of showcase on port 6080; SHOWCASE is the
+# directory of showcase. The server is started if none answers, and lives on
+# after the command. trunk and wasm-bindgen are on PATH.
 mockups:
-	cargo build --manifest-path ../showcase/Cargo.toml --bin showcase
-	../showcase/target/debug/showcase up
-	../showcase/target/debug/showcase build experiments/mockups --desk obusina --as mockups
+	@test -n "$(SHOWCASE)" || { echo 'SHOWCASE: the directory of showcase'; exit 1; }
+	ln -sfn "$(SHOWCASE)" experiments/mockups/.showcase
+	cargo build --manifest-path "$(SHOWCASE)/Cargo.toml" --bin showcase
+	"$(SHOWCASE)/target/debug/showcase" up
+	"$(SHOWCASE)/target/debug/showcase" build experiments/mockups --desk obusina --as mockups
 
 uninstall:
 	sudo rm -f $(BINDIR)/obusina

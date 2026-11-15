@@ -114,8 +114,7 @@ model (`crates/obusina-pattern/README.md`). Its tests are
       digits.
     - The place `0` shows the no entry sign `🚫` (`icons::EMPTY`), not the
       digit: it takes beads away. The fonts of egui carry no eraser; the
-      sign was picked from the list of `glyphs` of zyterm (`RULE
-      icon.search` there).
+      sign was picked from the list of `glyphs` (`RULE icon.search`).
     - The place `0` is drawn empty: the ground of the panel, `window_fill`,
       and the thin outline `SquareButton` draws round a fill.
     - Was: the digit `0`.

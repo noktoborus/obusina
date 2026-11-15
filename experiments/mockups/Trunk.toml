@@ -1,5 +1,5 @@
 # `make mockups` builds the mockups with trunk into a module of a desk of
-# /workspace/showcase, with addresses relative to the page; `trunk build`
+# showcase, with addresses relative to the page; `trunk build`
 # alone builds them here.
 [build]
 target = "index.html"
@@ -8,5 +8,5 @@ cargo_profile = "mockups"
 offline = true
 
 [tools]
-# The wasm-bindgen of /opt/packages.sh: trunk downloads nothing.
+# The wasm-bindgen on PATH, of the version of Cargo.lock: trunk downloads nothing.
 wasm_bindgen = "0.2.129"

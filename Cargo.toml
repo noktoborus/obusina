@@ -1,6 +1,6 @@
 [workspace]
 members = ["android", "crates/*", "experiments/glyphs"]
-# A workspace of its own: it depends on showcase, a project beside this one.
+# A workspace of its own: it depends on showcase (`make mockups`).
 exclude = ["experiments/mockups"]
 
 [workspace.package]

@@ -10,11 +10,11 @@ Mockups of the design of the window, shown in the gallery of `showcase`.
 - One module of `src/mock/` is one mockup, a `showcase::Mockup`. `mock::all`
   lists them for the gallery; `src/main.rs` hands them to `showcase::run`.
 - The gallery, the notes on a mockup, the page of the pictures and the
-  server are `/workspace/showcase`: `/workspace/showcase/README.md`.
-- `make mockups`, after `. /opt/env.sh`, starts the server of showcase on
+  server are those of showcase, the directory `SHOWCASE` names.
+- `make mockups` starts the server of showcase on
   port 6080 if none answers, and builds the page into the module `mockups`
   of the desk `obusina`. The notes and the pictures are those of the desk,
-  in `/workspace/showcase/desks/obusina`.
+  in `desks/obusina` of showcase.
 - `cargo run -p mockups` shows the same gallery in a window of the desktop.
   It sends no note.
 
@@ -39,10 +39,10 @@ Mockups of the design of the window, shown in the gallery of `showcase`.
 ## Errors
 
 A mockup that cannot open a menu says so in the log. What the server and
-the gallery answer is in `/workspace/showcase/README.md`.
+the gallery answer is in the README of showcase.
 
 ## Usage
 
 ```text
-. /opt/env.sh && make mockups     then  http://localhost:6080/#obusina/mockups/<name>
+make mockups     then  http://localhost:6080/#obusina/mockups/<name>
 ```
