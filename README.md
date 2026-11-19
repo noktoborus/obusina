@@ -143,8 +143,9 @@ says.
 ## Releases
 
 ```text
-make VERSION=x.y.z ──► a commit of the version, the tag vx.y.z
-git push && git push origin vx.y.z ──► .github/workflows/release.yml
+git push to main ──► .github/workflows/release.yml, the version YYYY.MM.DD,
+                     the day of the push in UTC
+    ├─ the checks
     ├─ the package of android, signed with the key of the secrets
     ├─ the program for Windows       ──► a release of GitHub, with all
     ├─ the program for Linux,             three
@@ -156,7 +157,12 @@ The program for Linux is built only for a release, by `make build` on a
 runner of each architecture in Debian 12 (`rust:bookworm`): it runs where
 the glibc is 2.36 or newer, Raspberry Pi OS of Debian 12 among them.
 
-Every push runs the checks and the three builds, unsigned
+Each job of a release writes the version into its tree by
+`make VERSION=YYYY.MM.DD`, and nothing commits it. The tag of the release is
+the version. A second push of a day takes the place of the release of that
+day, its tag on the new commit.
+
+A push to any other branch runs the checks and the three builds, unsigned
 (`.github/workflows/ci.yml`). The key of the releases of android is in the
 secrets of the repository (`android/README.md`). A release is published
 only on the page of releases.

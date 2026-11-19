@@ -1,20 +1,26 @@
-# A release, on a tag `vx.y.z` that `make VERSION=x.y.z` made and that was
-# pushed: the builds of build.yml, the package of android signed with the
-# key of the secrets; the program for Linux on x86_64 and on arm64, built
-# here only; a release of GitHub with the package and the programs for
-# Windows and Linux; and the site of the browser on GitHub Pages.
+# A release, on every push to main, named by the day of the push in UTC,
+# YYYY.MM.DD: the checks of checks.yml; the builds of build.yml, of that
+# version, the package of android signed with the key of the secrets; the
+# program for Linux on x86_64 and on arm64, built here only; a release of
+# GitHub with the package and the programs for Windows and Linux, its tag the
+# version; and the site of the browser on GitHub Pages.
 #
-# The repository needs, once: the four secrets that build.yml names;
-# GitHub Actions as the source of its Pages (Settings, Pages); and the tags
-# `v*.*.*` allowed to deploy to the environment `github-pages` (Settings,
-# Environments, github-pages, Deployment branches and tags), which allows
-# only the default branch until told.
+# A second push of a day takes the place of the release of that day: the
+# release and its tag are deleted and made again on the new commit. A push
+# while a release runs cancels it; the later push is released.
+#
+# The repository needs, once: the four secrets that build.yml names; and
+# GitHub Actions as the source of its Pages (Settings, Pages).
 
 name: release
 
 on:
   push:
-    tags: ["v*.*.*"]
+    branches: [main]
+
+concurrency:
+  group: release
+  cancel-in-progress: true
 
 jobs:
   version:
@@ -22,20 +28,19 @@ jobs:
     outputs:
       version: ${{ steps.version.outputs.version }}
     steps:
-      - uses: actions/checkout@v7
-      - name: the tag is the version of Cargo.toml (RULE version)
+      - name: the day of the push, in UTC
         id: version
-        run: |
-          written=$(sed -n '/^\[workspace.package\]/,/^\[/ s/^version = "\(.*\)"/\1/p' Cargo.toml)
-          test "v$written" = "$GITHUB_REF_NAME" \
-            || { echo "the tag $GITHUB_REF_NAME is not the version $written"; exit 1; }
-          echo "version=$written" >> "$GITHUB_OUTPUT"
+        run: echo "version=$(date -u +%Y.%m.%d)" >> "$GITHUB_OUTPUT"
+
+  checks:
+    uses: ./.github/workflows/checks.yml
 
   build:
-    needs: version
+    needs: [version, checks]
     uses: ./.github/workflows/build.yml
     with:
       signed: true
+      version: ${{ needs.version.outputs.version }}
     secrets: inherit
 
   # `make build` on a runner of each architecture, in Debian 12: the program
@@ -44,7 +49,7 @@ jobs:
   # It links only libc; the window loads X11 and Wayland when it starts. An
   # archive keeps the mode of the program, which an artifact loses.
   linux:
-    needs: version
+    needs: [version, checks]
     strategy:
       matrix:
         include:
@@ -57,6 +62,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: Swatinem/rust-cache@v2
+      - run: make VERSION=${{ needs.version.outputs.version }}
       - run: make build
       - name: the program in an archive
         run: tar -czf obusina-linux-${{ matrix.arch }}.tar.gz -C target/release obusina
@@ -86,8 +92,19 @@ jobs:
             cp "built/linux-$arch/obusina-linux-$arch.tar.gz" \
               "release/obusina-$VERSION-linux-$arch.tar.gz"
           done
+      - name: the release of the same day goes, with its tag
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          if gh release view "$VERSION" > /dev/null 2>&1; then
+            gh release delete "$VERSION" --cleanup-tag --yes
+          fi
+          gh api -X DELETE "repos/$GH_REPO/git/refs/tags/$VERSION" > /dev/null 2>&1 || true
       - uses: softprops/action-gh-release@v3
         with:
+          tag_name: ${{ env.VERSION }}
+          target_commitish: ${{ github.sha }}
           name: Obusina ${{ env.VERSION }}
           files: release/*
           fail_on_unmatched_files: true

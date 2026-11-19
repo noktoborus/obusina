@@ -1,7 +1,10 @@
-# The builds of the program, called by ci.yml on every push and by
-# release.yml on a tag of a version. Each job leaves its result as an
-# artifact of the run: the program for Windows, the package of android and
-# the site of the browser.
+# The builds of the program, called by ci.yml on every push to a branch
+# other than main and by release.yml on every push to main. Each job leaves
+# its result as an artifact of the run: the program for Windows, the package
+# of android and the site of the browser.
+#
+# With `version`, YYYY.MM.DD, each job writes it into the tree first, by
+# `make VERSION=`; without it the build carries the version of Cargo.toml.
 #
 # The package of android is signed only when `signed` is true, with the key
 # of the secrets of the repository:
@@ -20,6 +23,10 @@ on:
         description: Sign the package of android with the key of the secrets.
         type: boolean
         default: false
+      version:
+        description: The version of a release, YYYY.MM.DD.
+        type: string
+        default: ""
 
 env:
   CARGO_TERM_COLOR: always
@@ -39,6 +46,9 @@ jobs:
         with:
           targets: x86_64-pc-windows-gnu
       - uses: Swatinem/rust-cache@v2
+      - name: the version of the release
+        if: inputs.version != ''
+        run: make VERSION=${{ inputs.version }}
       - name: mingw, whose windres compiles the icon
         run: sudo apt-get update && sudo apt-get install -y gcc-mingw-w64-x86-64
       - run: make build-windows
@@ -56,6 +66,9 @@ jobs:
         with:
           targets: aarch64-linux-android,x86_64-linux-android
       - uses: Swatinem/rust-cache@v2
+      - name: the version of the release
+        if: inputs.version != ''
+        run: make VERSION=${{ inputs.version }}
       - uses: actions/setup-java@v6
         with:
           distribution: temurin
@@ -103,6 +116,9 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
+      - name: the version of the release
+        if: inputs.version != ''
+        run: make VERSION=${{ inputs.version }}
       - uses: taiki-e/install-action@v2
         with:
           tool: trunk@0.22.0

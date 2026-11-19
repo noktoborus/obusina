@@ -17,14 +17,20 @@ RULE product = Obusina, an editor of bead patterns
 REF  README.md
 REF  ARCHITECTURE.md
 
-RULE version = `version` of `[workspace.package]` of Cargo.toml, set by
-     `make VERSION=x.y.z`, which commits it and tags it `vx.y.z`
+RULE version = the day of a release in UTC, YYYY.MM.DD; `version` of
+     `[workspace.package]` of Cargo.toml carries it
+THEN `make VERSION=YYYY.MM.DD` writes it into the tree of the build, with no
+     zero before a number, as cargo wants; nothing commits it
 THEN the android package reads it from there; it is written nowhere else
+THEN the version committed is the one of a build made by hand
 REF  Makefile, target `version`
 
-RULE release : a tag `vx.y.z` pushed is a release, by
-     `.github/workflows/release.yml`: on the page of releases only, the
-     site of the browser on GitHub Pages
+RULE release : every push to main is a release, by
+     `.github/workflows/release.yml`, its tag the version: on the page of
+     releases only, the site of the browser on GitHub Pages
+THEN the checks of `.github/workflows/checks.yml` run first; a release
+     waits for them
+THEN a second push of a day takes the place of the release of that day
 THEN the builds are `.github/workflows/build.yml`, for every push and for a
      release; a step of a build is a target of the Makefile, so it runs here
      the same
