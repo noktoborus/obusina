@@ -77,6 +77,14 @@ fn handle(window: &Window, corner: usize) -> Pos2 {
     obusina_canvas::handles(field, &app.view, &app.backdrop.corners)[corner]
 }
 
+/// The bar of an edge of the picture on the screen: edge `i` runs from
+/// corner `i` to the next.
+fn bar(window: &Window, edge: usize) -> Pos2 {
+    let field = window.harness.get_by_label(&t!("field")).rect();
+    let app = window.harness.state();
+    obusina_canvas::bars(field, &app.view, &app.backdrop.corners)[edge]
+}
+
 /// The first button pressed at `start`, dragged by `by`, and let go.
 fn drag(window: &mut Window, start: Pos2, by: egui::Vec2) {
     let button = |pos, pressed| Event::PointerButton {
@@ -161,6 +169,30 @@ fn the_corners_are_kept_or_put_back() {
     )
     .expect("the description");
     assert!(text.contains(&kept[2].x.to_string()), "{text}");
+}
+
+/// The bar of the bottom edge moves its two corners down, only across the
+/// edge: a drag aslant does not slide it sideways. The top edge stays.
+#[test]
+fn a_bar_moves_the_two_corners_of_its_edge() {
+    let mut window = window();
+    choose(&mut window);
+    in_the_middle(&mut window);
+    let before = window.harness.state().backdrop.corners;
+    menu(&mut window, &t!("backdrop.edit"));
+
+    let bottom = bar(&window, 2);
+    drag(&mut window, bottom, egui::vec2(25.0, 30.0));
+    let moved = window.harness.state().backdrop.corners;
+
+    assert_eq!(moved[..2], before[..2], "the top edge stays");
+    for corner in [2, 3] {
+        assert!(moved[corner].y > before[corner].y, "{moved:?}");
+        assert!(
+            (moved[corner].x - before[corner].x).abs() < 1e-3,
+            "{moved:?}"
+        );
+    }
 }
 
 /// A drag that begins inside the picture moves all of it.

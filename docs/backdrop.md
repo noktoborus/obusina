@@ -47,11 +47,17 @@ over four corners, kept apart from the pattern. The store is the crate
 10. **A new picture lies over the work area,** in its middle, as large as
     fits it, its sides as they are.
 11. **The corners are edited on the field.** A drag that begins on the
-    handle of a corner moves that corner; one inside the picture moves all
+    handle of a corner moves that corner; one on the bar in the middle of an
+    edge moves the two corners of that edge; one inside the picture moves all
     of it; one outside moves the field, so a corner off the screen is
     reached. Where it begins is where the button went down, so a quick drag
     still takes its handle. A press puts no bead while the corners are
     edited.
+    - A bar moves its edge only across it: the picture grows or shrinks on
+      that side, and the edge does not slide along itself. An edge too short
+      on the screen to hold its bar between its two handles shows none.
+      - Why: two corners moved one by one leave the edge aslant; the bar
+        keeps it as it was.
     - Two fingers whose middle is on the picture move, turn and grow it
       as one, about their middle; the four corners keep their shape. Their
       middle beside the picture moves the field, as one finger does.
@@ -75,7 +81,8 @@ over four corners, kept apart from the pattern. The store is the crate
       - Why part of the way: a picture laid by its corners over a photo
         taken at an angle is mended a little, not lost.
       - Was: `📐` turned the picture to the nearest ten degrees.
-12. **A corner never turns the picture inside out.** It moves only as far
+12. **A corner never turns the picture inside out,** nor does an edge. It
+    moves only as far
     as the four stay convex and turn the same way at each corner, by at
     least `LEAST_TURN`; dragged further, it stops at the last place that
     keeps them so. Corners already wrong, from a file written by hand, move

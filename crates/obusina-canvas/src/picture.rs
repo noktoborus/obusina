@@ -2,8 +2,10 @@
 //! handles that move them.
 //!
 //! ```text
-//! editing ──► a handle on each corner
+//! editing ──► a handle on each corner, a bar on the middle of each edge
 //!             drag that starts on a handle: that corner moves
+//!             drag that starts on a bar:    the two corners of its edge
+//!                                           move across the edge
 //!             drag that starts inside:      the whole picture moves
 //!             drag that starts outside:     the field moves, as always
 //!             two fingers, their middle inside: the picture moves, turns
@@ -23,7 +25,12 @@
 //!
 //! A corner moves only as far as the four stay convex and in their turn, so
 //! the picture is never turned inside out: a corner dragged past that stops
-//! at the last place that keeps them so.
+//! at the last place that keeps them so. An edge moved by its bar stops the
+//! same way.
+//!
+//! A bar moves its edge only across it, so a drag grows or shrinks the
+//! picture and does not slide the edge along itself. An edge too short on
+//! the screen to hold its bar between its two handles shows none.
 //!
 //! A picture with no texture yet, while it loads, is a panel over the same
 //! corners with a light band running across it, `SHIMMER_PERIOD` a pass.
@@ -38,6 +45,12 @@ const STEPS: usize = 24;
 pub const HANDLE: f32 = 14.0;
 /// How far from its middle a handle is taken, as a part of its radius.
 const HANDLE_REACH: f32 = 1.5;
+/// The length of the bar on the middle of an edge.
+const BAR_LENGTH: f32 = 3.0 * HANDLE;
+/// The thickness of the bar.
+const BAR_WIDTH: f32 = 10.0;
+/// How far from its middle line a bar is taken.
+const BAR_REACH: f32 = HANDLE;
 /// The width of the lines between the handles.
 const EDGE: f32 = 2.0;
 /// The colour of the lines and the rings of the handles.
@@ -83,6 +96,9 @@ pub struct Picture<'a> {
 enum Grab {
     /// One corner, by its index.
     Corner(usize),
+    /// The two corners of one edge, by the index of its first corner: the
+    /// edge runs from it to the next.
+    Edge(usize),
     /// The whole picture.
     Whole,
 }
@@ -191,6 +207,14 @@ impl Canvas<'_> {
                 .iter()
                 .position(|corner| corner.distance(at) <= HANDLE * HANDLE_REACH)
                 .map(Grab::Corner)
+                .or_else(|| {
+                    (0..shown.len())
+                        .find(|edge| {
+                            bar(shown, *edge)
+                                .is_some_and(|[a, b]| distance_to_segment(at, a, b) <= BAR_REACH)
+                        })
+                        .map(Grab::Edge)
+                })
                 .or_else(|| inside(shown, at).then_some(Grab::Whole));
             ui.data_mut(|data| match grab {
                 Some(grab) => {
@@ -203,9 +227,16 @@ impl Canvas<'_> {
             return false;
         };
         if response.dragged() {
-            let delta = self.view.to_pattern(response.drag_delta()) / self.view.bead;
+            let dragged = response.drag_delta();
+            let delta = self.view.to_pattern(dragged) / self.view.bead;
             match grab {
-                Grab::Corner(index) => move_corner(picture.corners, index, delta),
+                Grab::Corner(index) => move_corners(picture.corners, &[index], delta),
+                Grab::Edge(first) => {
+                    let next = (first + 1) % shown.len();
+                    let across = across(shown[first], shown[next], dragged);
+                    let delta = self.view.to_pattern(across) / self.view.bead;
+                    move_corners(picture.corners, &[first, next], delta);
+                }
                 Grab::Whole => picture
                     .corners
                     .iter_mut()
@@ -244,8 +275,8 @@ impl Canvas<'_> {
         }
     }
 
-    /// Draws the edges of the picture and the handles of its corners, over
-    /// the beads.
+    /// Draws the edges of the picture, the bars of its edges and the
+    /// handles of its corners, over the beads.
     pub(crate) fn draw_handles(
         &self,
         painter: &egui::Painter,
@@ -257,23 +288,71 @@ impl Canvas<'_> {
         for index in 0..shown.len() {
             painter.line_segment([shown[index], shown[(index + 1) % shown.len()]], line);
         }
+        for edge in 0..shown.len() {
+            if let Some([a, b]) = bar(shown, edge) {
+                let ring = BAR_WIDTH / 2.0 + EDGE;
+                painter.line_segment([a, b], egui::Stroke::new(ring * 2.0, EDGE_COLOUR));
+                painter.circle_filled(a, ring, EDGE_COLOUR);
+                painter.circle_filled(b, ring, EDGE_COLOUR);
+                painter.line_segment([a, b], egui::Stroke::new(BAR_WIDTH, Color32::WHITE));
+                painter.circle_filled(a, BAR_WIDTH / 2.0, Color32::WHITE);
+                painter.circle_filled(b, BAR_WIDTH / 2.0, Color32::WHITE);
+            }
+        }
         for corner in shown {
             painter.circle(corner, HANDLE, Color32::WHITE, line);
         }
     }
 }
 
-/// Moves corner `index` by `delta`, or as far along it as the corners stay
-/// convex and in their turn ([`convex`]). Corners that are not so already
-/// move freely, so a picture laid wrong is mended by hand.
-fn move_corner(corners: &mut [Vec2; 4], index: usize, delta: Vec2) {
+/// The two ends of the middle line of the bar of edge `first`, from corner
+/// `first` to the next, on the screen; `None` when the edge is too short to
+/// hold it between the reach of its two handles.
+fn bar(shown: [Pos2; 4], first: usize) -> Option<[Pos2; 2]> {
+    let (from, to) = (shown[first], shown[(first + 1) % shown.len()]);
+    let length = from.distance(to);
+    let room = BAR_LENGTH + 2.0 * HANDLE * HANDLE_REACH;
+    (length >= room).then(|| {
+        let middle = from.lerp(to, 0.5);
+        let half = (to - from) / length * BAR_LENGTH / 2.0;
+        [middle - half, middle + half]
+    })
+}
+
+/// The part of `dragged` across the edge from `from` to `to`, on the
+/// screen.
+fn across(from: Pos2, to: Pos2, dragged: Vec2) -> Vec2 {
+    let normal = (to - from).rot90().normalized();
+    normal * normal.dot(dragged)
+}
+
+/// How far `point` is from the segment from `a` to `b`.
+fn distance_to_segment(point: Pos2, a: Pos2, b: Pos2) -> f32 {
+    let along = b - a;
+    let part = ((point - a).dot(along) / along.length_sq()).clamp(0.0, 1.0);
+    point.distance(a + along * part)
+}
+
+/// The bars of the edges on the screen, each by its middle, for a test that
+/// drags them: edge `i` runs from corner `i` to the next.
+pub fn bars(canvas_rect: Rect, view: &crate::View, corners: &[Vec2; 4]) -> [Pos2; 4] {
+    let shown = handles(canvas_rect, view, corners);
+    std::array::from_fn(|first| shown[first].lerp(shown[(first + 1) % shown.len()], 0.5))
+}
+
+/// Moves the corners of `indices` by `delta`, or as far along it as the
+/// corners stay convex and in their turn ([`convex`]). Corners that are not
+/// so already move freely, so a picture laid wrong is mended by hand.
+fn move_corners(corners: &mut [Vec2; 4], indices: &[usize], delta: Vec2) {
     let moved = |part: f32| {
         let mut moved = *corners;
-        moved[index] += delta * part;
+        for index in indices {
+            moved[*index] += delta * part;
+        }
         moved
     };
     if convex(&moved(1.0)) || !convex(corners) {
-        corners[index] += delta;
+        *corners = moved(1.0);
         return;
     }
     let (mut kept, mut refused) = (0.0, 1.0);
@@ -623,7 +702,7 @@ mod tests {
     fn a_corner_moves_freely_while_the_box_stays_convex() {
         let mut corners = BOX;
 
-        move_corner(&mut corners, 2, Vec2::new(1.0, 2.0));
+        move_corners(&mut corners, &[2], Vec2::new(1.0, 2.0));
 
         assert_eq!(corners[2], Vec2::new(5.0, 5.0));
     }
@@ -634,11 +713,46 @@ mod tests {
     fn a_corner_stops_before_the_picture_turns_inside_out() {
         let mut corners = BOX;
 
-        move_corner(&mut corners, 2, Vec2::new(-10.0, -10.0));
+        move_corners(&mut corners, &[2], Vec2::new(-10.0, -10.0));
 
         assert!(convex(&corners), "{corners:?}");
         assert!(corners[2].x > 0.0 && corners[2].y > 0.0, "{corners:?}");
         assert_eq!(corners[0], BOX[0], "the other corners stay");
+    }
+
+    /// The bottom edge dragged up past the top one stops before the picture
+    /// would turn inside out; the top edge stays.
+    #[test]
+    fn an_edge_stops_before_the_picture_turns_inside_out() {
+        let mut corners = BOX;
+
+        move_corners(&mut corners, &[2, 3], Vec2::new(0.0, -10.0));
+
+        assert!(convex(&corners), "{corners:?}");
+        assert!(
+            corners[2].y > 0.0 && corners[2].y == corners[3].y,
+            "{corners:?}"
+        );
+        assert_eq!(corners[..2], BOX[..2], "the top edge stays");
+    }
+
+    /// A drag along an edge and across it moves the edge only across it.
+    #[test]
+    fn an_edge_moves_only_across_itself() {
+        let moved = across(pos2(0.0, 0.0), pos2(10.0, 0.0), Vec2::new(7.0, 3.0));
+
+        assert!((moved - Vec2::new(0.0, 3.0)).length() < 1e-5, "{moved:?}");
+    }
+
+    /// A short edge shows no bar; a long one shows it in its middle.
+    #[test]
+    fn a_bar_stands_in_the_middle_of_a_long_edge() {
+        let small = SQUARE;
+        assert_eq!(bar(small, 0), None);
+        let large = SQUARE.map(|corner| (corner.to_vec2() * 20.0).to_pos2());
+        let [a, b] = bar(large, 0).expect("a bar");
+        assert!((a.lerp(b, 0.5) - pos2(100.0, 0.0)).length() < 1e-4);
+        assert!((a.distance(b) - BAR_LENGTH).abs() < 1e-4);
     }
 
     #[test]

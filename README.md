@@ -54,7 +54,8 @@ The screenshots are drawn by `src/window_tests/screenshots.rs`;
   size.
 - An underlay, a picture under the beads to trace from: PNG, JPEG or WebP, its opacity
   and its four corners set by hand, so a photo taken at an angle lies
-  straight. While its corners are edited, two fingers on it move, turn and
+  straight. While its corners are edited, a bar on the middle of an edge
+  moves the two corners of that edge at once; two fingers on it move, turn and
   grow it, the turn sticking to a whole quarter; over it Ctrl and the wheel
   grow it, Shift and the wheel turn it. Buttons turn it a quarter either
   way, and make its corners squarer, ten degrees a press. It is kept in the cache of the program, apart from the pattern.

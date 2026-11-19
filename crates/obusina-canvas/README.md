@@ -41,14 +41,16 @@ The field of beads: an egui widget that draws an
   projection they give (`picture.rs`). With no texture, while it loads, a
   panel over the same corners shimmers in its place, a light band across it
   every `SHIMMER_PERIOD`; the window draws again all along. While
-  `editing`, a handle on each corner moves it, a drag inside moves all of
+  `editing`, a handle on each corner moves it, a bar on the middle of each
+  edge moves the two corners of that edge across it, a drag inside moves all of
   it, and a drag outside moves the field; the handles are drawn over the
   beads. Two fingers with their middle on it move, turn and grow it, and
   so do Ctrl or Shift with the wheel over it; the turn sticks to a whole
   quarter within `SNAP_TURN`. `turn_corners` turns the corners about their
   middle, `square_corners` takes them part of the way to a rectangle. A corner moves only as far as the four stay
-  convex and in their turn: the picture never turns inside out. `handles` gives where they are,
-  for a test.
+  convex and in their turn: the picture never turns inside out; so does an
+  edge. An edge too short on the screen for its bar between its handles
+  shows none. `handles` and `bars` give where they are, for a test.
 - Puts the middle of the work area, or cell (0, 0) when there is none, in
   the middle of the field the first time the field has a size.
 - Keeps the middle of the field where it is when the field changes its

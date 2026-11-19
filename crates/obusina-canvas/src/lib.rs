@@ -10,7 +10,7 @@ mod texture;
 mod tone;
 mod view;
 
-pub use picture::{HANDLE, Picture, SHIMMER_PERIOD, handles, square_corners, turn_corners};
+pub use picture::{HANDLE, Picture, SHIMMER_PERIOD, bars, handles, square_corners, turn_corners};
 pub use shadow::{FRAME_FADE, NEAR_RADIUS};
 pub use still::still;
 pub use tone::{LIGHT, Tones, lightness};
