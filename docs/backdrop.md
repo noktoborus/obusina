@@ -44,8 +44,13 @@ over four corners, kept apart from the pattern. The store is the crate
      the lines of the picture break on the diagonal.
 9. **The corners are on the field, in bead units.** The picture moves,
    zooms and turns with the beads.
-10. **A new picture lies over the work area,** in its middle, as large as
-    fits it, its sides as they are.
+10. **A new picture lies over the larger of the work area and the screen,**
+    in its middle, as large as fits it, its sides as they are. Larger is the
+    one where the fitted picture comes out larger. The screen is
+    `View::screen`, at the zoom it stands at.
+    - Why the screen: a new pattern sized by the beads has no work area,
+      and a few beads make a small one; the picture came out one bead
+      large.
 11. **The corners are edited on the field.** A drag that begins on the
     handle of a corner moves that corner; one on the bar in the middle of an
     edge moves the two corners of that edge; one inside the picture moves all
@@ -98,7 +103,8 @@ over four corners, kept apart from the pattern. The store is the crate
       while they wait.
 14. **While a picture loads, a panel shimmers in its place.** Over its
     corners once the description is read; over a square in the middle of
-    the work area while a new picture is decoded, for its sides are not
+    the larger of the work area and the screen while a new picture is
+    decoded, for its sides are not
     known yet. Until the store answers whether there is a picture at all,
     nothing stands.
 
@@ -129,7 +135,8 @@ picture, shown or loads ► PlateMenu: the opacity on top, then
 ```text
 open ──► find ──► none ──────────────────────────► no picture
              └─► description: shimmer over its corners ──► read, decode ──► picture
-choose ──► shimmer over a square ──► decode: corners over the work area ──► put ──► picture
+choose ──► shimmer over a square ──► decode: corners over the larger of
+           the work area and the screen ──► put ──► picture
 ```
 
 ```text

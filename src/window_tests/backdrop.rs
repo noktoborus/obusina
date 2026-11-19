@@ -129,6 +129,21 @@ fn a_chosen_picture_is_found_again() {
     assert_eq!(again.backdrop.corners, corners);
 }
 
+/// A picture chosen for a new pattern, with no bead and no field set,
+/// lies over the screen, not over one bead.
+#[test]
+fn a_picture_for_an_empty_pattern_fills_the_screen() {
+    let mut window = window();
+    assert_eq!(window.harness.state().pattern.work_area(), None);
+    choose(&mut window);
+
+    let app = window.harness.state();
+    let ((left, _), (right, _)) = app.view.screen().expect("the field has a size");
+    let [top_left, _, bottom_right, _] = app.backdrop.corners;
+    let width = bottom_right.x - top_left.x;
+    assert!(width > (right - left) / 2.0, "{width} of {}", right - left);
+}
+
 /// A handle moves its corner; "put back" puts it back, "keep" keeps and
 /// writes it. A press on the field while the corners are edited paints
 /// nothing.

@@ -14,6 +14,8 @@ The field of beads: an egui widget that draws an
   the screen are drawn.
 - `View::first_screen`: the cells a screen of the size last drawn holds at
   zoom 1, about its middle; the size a field set by hand starts at.
+- `View::screen`: the screen as last drawn, on the pattern in bead units, at
+  the zoom it stands at; `None` before the field has a size.
 - A bead is drawn at its proportions, with a small gap. The ground of the
   work area is the paper of the pattern, `Pattern::paper`; the rest of the
   field is the paper in shade. `Tones::of` takes from the paper the shade,

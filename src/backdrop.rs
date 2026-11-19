@@ -5,13 +5,14 @@
 //! The store and the decoding of a picture work away from the frame, one job
 //! after another ([`crate::task`]); their answers come back in a later frame.
 //! While a picture loads, a panel that shimmers stands in its place: over its
-//! corners once they are read, a square in the middle of the work area until
-//! then.
+//! corners once they are read, a square in the middle of the larger of the
+//! work area and the screen until then.
 //!
 //! ```text
 //! first frame ──► find ──► none ──────────────────────► no picture
 //!                      └─► the description: corners ──► read, decode ──► the picture
-//! chosen file ──► a square ──► decode: corners over the work area ──► put ──► the picture
+//! chosen file ──► a square ──► decode: corners over the larger of the work area
+//!                                       and the screen ──► put ──► the picture
 //! ```
 //!
 //! A change of the picture is no step of undo: the picture is not part of
@@ -22,6 +23,7 @@ use std::sync::{Arc, Mutex};
 
 use egui::{ColorImage, TextureHandle, Vec2, vec2};
 use obusina_backdrop::{Backdrop as Description, Kept, Kind, Store};
+use obusina_canvas::View;
 use obusina_pattern::{Bounds, Cell, Pattern, PatternId};
 
 use crate::error::{AppError, Result};
@@ -46,8 +48,8 @@ enum Answer {
     Failed(AppError),
 }
 
-/// The span of the work area on the field, in bead units: its top left and
-/// bottom right corners.
+/// A span on the field, in bead units: its top left and bottom right
+/// corners.
 type Span = ((f32, f32), (f32, f32));
 
 /// The picture under the pattern, and the store it is kept in.
@@ -242,23 +244,25 @@ impl Backdrop {
     }
 
     /// Puts a picture chosen by the person under the pattern, in place of the
-    /// one it had, whose corners it takes. Until it is decoded a square
-    /// stands for a first picture in the middle of the work area; it then
-    /// lies over the work area, as large as fits it, its sides as they are.
+    /// one it had, whose corners it takes. A first picture lies in the
+    /// larger of the work area and the screen of `view`, as large as fits
+    /// it, its sides as they are; until it is decoded a square stands for it
+    /// there.
     /// Once it is decoded its corners are edited: "put back" puts them where
     /// it was laid.
     pub fn put(
         &mut self,
         context: &egui::Context,
         pattern: &Pattern,
+        view: &View,
         picked: Picked,
     ) -> Result<()> {
         let store = self.store.clone().ok_or(AppError::NoCache)?;
         Kind::of(&picked.bytes).ok_or(AppError::PictureKind)?;
-        let span = span(pattern);
+        let spans = spans(pattern, view);
         let corners = self.has().then_some(self.corners);
         if corners.is_none() {
-            self.corners = square(span);
+            self.corners = square(&spans);
             self.set_opacity(DEFAULT_OPACITY);
         }
         if let Some(kept) = &mut self.kept {
@@ -282,7 +286,7 @@ impl Backdrop {
                 Ok(image) => image,
                 Err(error) => return send(Answer::Failed(error)),
             };
-            let corners = corners.unwrap_or_else(|| over(span, image.size));
+            let corners = corners.unwrap_or_else(|| over(&spans, image.size));
             let description = Description {
                 corners: corners.map(|corner| [corner.x, corner.y]),
                 ..description
@@ -431,12 +435,19 @@ fn decode(bytes: &[u8]) -> Result<ColorImage> {
     Ok(ColorImage::from_rgba_unmultiplied(size, rgba.as_raw()))
 }
 
-/// The span of the work area of `pattern` on the field.
-fn span(pattern: &Pattern) -> Span {
+/// Where a first picture may lie: the work area of `pattern` and the screen
+/// of `view`, the ones there are; cell (0, 0) with neither.
+fn spans(pattern: &Pattern, view: &View) -> Vec<Span> {
     let area = pattern
         .work_area()
-        .unwrap_or(Bounds::of(Cell { column: 0, row: 0 }));
-    pattern.grid().span(area, pattern.ratio())
+        .map(|area| pattern.grid().span(area, pattern.ratio()));
+    let spans: Vec<Span> = area.into_iter().chain(view.screen()).collect();
+    if spans.is_empty() {
+        let cell = Bounds::of(Cell { column: 0, row: 0 });
+        vec![pattern.grid().span(cell, pattern.ratio())]
+    } else {
+        spans
+    }
 }
 
 /// The corners of a box of the sides of `size` in the middle of `span`, as
@@ -454,16 +465,30 @@ fn fit(((left, top), (right, bottom)): Span, size: Vec2) -> [Vec2; 4] {
     [min, vec2(max.x, min.y), max, vec2(min.x, max.y)]
 }
 
-/// The corners of a picture of `size` pixels laid over `span`: in its
-/// middle, as large as fits it, its sides as they are.
-fn over(span: Span, size: [usize; 2]) -> [Vec2; 4] {
-    fit(span, vec2(size[0] as f32, size[1] as f32))
+/// The corners of a box of the sides of `size` fitted to each of `spans`
+/// ([`fit`]): the largest of them.
+fn fit_largest(spans: &[Span], size: Vec2) -> [Vec2; 4] {
+    let area = |corners: &[Vec2; 4]| {
+        let side = corners[2] - corners[0];
+        side.x * side.y
+    };
+    spans
+        .iter()
+        .map(|span| fit(*span, size))
+        .max_by(|a, b| area(a).total_cmp(&area(b)))
+        .unwrap_or_default()
+}
+
+/// The corners of a picture of `size` pixels laid over the larger of
+/// `spans`: in its middle, as large as fits it, its sides as they are.
+fn over(spans: &[Span], size: [usize; 2]) -> [Vec2; 4] {
+    fit_largest(spans, vec2(size[0] as f32, size[1] as f32))
 }
 
 /// The square that stands for a picture whose sides are not known yet: in
-/// the middle of `span`, as large as fits it.
-fn square(span: Span) -> [Vec2; 4] {
-    fit(span, Vec2::splat(1.0))
+/// the middle of the larger of `spans`, as large as fits it.
+fn square(spans: &[Span]) -> [Vec2; 4] {
+    fit_largest(spans, Vec2::splat(1.0))
 }
 
 #[cfg(test)]
@@ -491,15 +516,28 @@ mod tests {
 
     #[test]
     fn a_first_picture_lies_over_the_work_area_with_its_sides() {
-        let corners = over(SPAN, [200, 100]);
+        let corners = over(&[SPAN], [200, 100]);
 
         assert_eq!(corners[0], vec2(0.0, 2.5));
         assert_eq!(corners[2], vec2(10.0, 7.5));
     }
 
+    /// A wide picture fits a wide screen larger than a tall work area, and
+    /// lies there.
+    #[test]
+    fn a_picture_lies_in_the_span_it_fits_largest() {
+        let tall = ((0.0, 0.0), (4.0, 20.0));
+        let wide = ((10.0, 0.0), (40.0, 10.0));
+
+        let corners = over(&[tall, wide], [200, 100]);
+
+        assert_eq!(corners[0], vec2(15.0, 0.0));
+        assert_eq!(corners[2], vec2(35.0, 10.0));
+    }
+
     #[test]
     fn a_picture_of_unknown_sides_is_a_square_in_the_middle() {
-        let corners = square(((0.0, 0.0), (10.0, 6.0)));
+        let corners = square(&[((0.0, 0.0), (10.0, 6.0))]);
 
         assert_eq!(corners[0], vec2(2.0, 0.0));
         assert_eq!(corners[2], vec2(8.0, 6.0));

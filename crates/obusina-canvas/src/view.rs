@@ -108,6 +108,25 @@ impl View {
         }
     }
 
+    /// The screen as last drawn, on the pattern in bead units: the least and
+    /// the most of its left and top, `((left, top), (right, bottom))`.
+    /// `None` before the field has a size.
+    pub fn screen(&self) -> Option<((f32, f32), (f32, f32))> {
+        if self.field.x <= 0.0 || self.field.y <= 0.0 {
+            return None;
+        }
+        let corners = [
+            Vec2::ZERO,
+            vec2(self.field.x, 0.0),
+            self.field,
+            vec2(0.0, self.field.y),
+        ]
+        .map(|corner| self.to_pattern(corner - self.offset) / self.bead);
+        let min = corners.iter().fold(corners[0], |min, at| min.min(*at));
+        let max = corners.iter().fold(corners[0], |max, at| max.max(*at));
+        Some(((min.x, min.y), (max.x, max.y)))
+    }
+
     /// The cells a screen of the size last drawn holds at zoom 1
     /// (`DEFAULT_BEAD`), about the cell in the middle of the screen: the
     /// size a field set by hand starts at.

@@ -248,7 +248,9 @@ impl App {
 
     /// Puts a picture chosen by the person under the pattern.
     pub(crate) fn take_picture(&mut self, context: &egui::Context, picked: crate::pick::Picked) {
-        let done = self.backdrop.put(context, &self.pattern, picked);
+        let done = self
+            .backdrop
+            .put(context, &self.pattern, &self.view, picked);
         self.say_backdrop(done);
     }
 
